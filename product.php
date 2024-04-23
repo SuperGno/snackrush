@@ -1,3 +1,24 @@
+<?php
+require_once "connection.php";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $id=$_POST["id"];
+    $quantity=$_POST['quantity'];
+    $sql="SELECT * FROM product WHERE id = $id";
+    $result= mysqli_query($conn,$sql);
+    while($row=mysqli_fetch_assoc($result)){
+      $image= $row['image'];
+      $name= $row['name'];
+      $price= $row['price'];
+      $totalprice=$quantity*$price;
+      
+      $sqlinsert="INSERT INTO cart(productId, image, name, quantity, price) VALUES('$id', '$image', '$name', '$quantity', '$totalprice')";
+      mysqli_query($conn, $sqlinsert);
+
+    }
+    header("Location: {$_SERVER['REQUEST_URI']}");
+}
+?>
 
 
 <!DOCTYPE html>
@@ -68,23 +89,28 @@
     <section>
         <div class="container text-center mt-5" data-aos="fade-up">
             <div class="row">
-            <?php
-              require_once "connection.php";
-              $sql = "SELECT * FROM product";
-              $result = mysqli_query($conn, $sql);
-              while ($row = mysqli_fetch_assoc($result)) {
-                  echo '<div class="col-md-4">
-                          <div class="card" style="width: 18rem;">
-                              <img src="assets/product/' . $row['image'] . '" class="card-img-top" alt="' . $row['image'] . '">
-                              <div class="card-body">
-                                  <h5 class="card-title">' . $row['name'] . '</h5>
-                                  <p class="card-text">' . $row['price'] . '</p>
-                                  <a href="#" class="btn btn-primary">Add to Cart</a>
-                              </div>
-                          </div>
-                      </div>';
-              }
-            ?>
+              <?php
+                $sql = "SELECT * FROM product";
+                $result = mysqli_query($conn, $sql);
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo '<div class="col-md-4">
+                            <div class="card" style="width: 18rem;">
+                                <img src="assets/product/' . $row['image'] . '" class="card-img-top" alt="' . $row['image'] . '">
+                                <div class="card-body">
+                                    <h5 class="card-title">' . $row['name'] . '</h5>
+                                    <p class="card-text">' . $row['price'] . '</p>
+                                    <form action ="#" method="post">
+                                    <div class="col-3 product-sub-1">
+                                          <p id="qty">Qty: <br><input type="number" name="quantity" min="1" value="1" id="" class="quantity"></p>
+                                      </div>
+                                    <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                    <input type="text" hidden name="id" value="'. $row['id'].'">
+                                    </form>
+                                </div>
+                            </div>
+                        </div>';
+                }
+              ?>
                 
             
             </div>

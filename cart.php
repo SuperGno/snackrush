@@ -65,47 +65,49 @@
 
     </div>
   </header>
-  <section>
-    <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Product</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>chicken</td>
-            <td>Otto</td>
-            <td>30</td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>fries</td>
-            <td>Thornton</td>
-            <td>10</td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td colspan="2">flot</td>
-            <td>25</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-    <section class="sample-page">
-      <!--Copy this <div> section to create more objects-->
-      <div class="container" data-aos="fade-up">
+    <section>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>\
+              <th scope="col">image</th>
+              <th scope="col">Product</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+          <?php
+            require_once "connection.php";
+            $sql = "SELECT * FROM cart";
+            $result = mysqli_query($conn, $sql);
+            while ($row = mysqli_fetch_assoc($result)) {
+                echo '<tr>';
+                echo '<th scope="row">' . $row['id'] . '</th>';
+                echo '<td><img src="assets/product/' . $row['image'] . '" alt="' . $row['image'] . '" style="width: 100px;"></td>';
+                echo '<td>' . $row['name'] . '</td>';
+                echo '<td>' . $row['quantity'] . '</td>';
+                echo '<td> ₱ ' . $row['price'] . '</td>';
+                echo '</tr>';
+            }
+            
+            ?>
 
-        <p>
-          [Inner Page here]
-        </p>
-
+          </tbody>
+        </table>
+      </section>
+        <button type="sumbit" class="btn btn-primary" id="checkoutBtn">Checkout</button>
+    <div class="modal" id="receiptModal">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title">Receipt</h5>
+              </div>
+              <div class="modal-body">
+              </div>
+          </div>
       </div>
-    </section>
+    </div>
 
   </main>
 
@@ -141,11 +143,55 @@
               window.location.href = "cart.php?user_id=" + userId;
           });
 });
+$(document).ready(function(){
+    $("#checkoutBtn").click(function(){
+        $.ajax({
+            url: 'getcartdata.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                var cartData = response;
+                var modalBodyHTML = '<table class="cart-item-list">';
+                var totalPrice = 0; // Initialize total price variable
+                
+                // Table header
+                modalBodyHTML += '<thead><tr><th class="text-center">Product</th><th class="text-center">Quantity</th><th class="text-center">Price</th></tr></thead>';
+
+                for (var i = 0; i < cartData.length; i++) {
+                    modalBodyHTML += '<tr>';
+                    modalBodyHTML += '<td class="item-name text-center">' + cartData[i].name + '</td>';
+                    modalBodyHTML += '<td class="item-quantity text-center">' + cartData[i].quantity + '</td>';
+                    modalBodyHTML += '<td class="item-price text-center">₱ ' + cartData[i].price + '</td>';
+                    modalBodyHTML += '</tr>';
+
+                    totalPrice += parseFloat(cartData[i].price); // Add item price to total price
+                }
+
+                // Close the table
+                modalBodyHTML += '</table>';
+
+                // Append total price to modal body
+                modalBodyHTML += '<p class="total-price">Total Price: ₱ ' + totalPrice.toFixed(2) + '</p>';
+
+                document.getElementById('receiptModal').querySelector('.modal-body').innerHTML = modalBodyHTML;
+                $('#receiptModal').modal('show');
+            },
+            error: function() {
+                alert('Failed to fetch cart data');
+            }
+        });
+    });
+});
 
 
-    </script>
 
-    </script>
+
+
+
+
+
+
+</script>
 
 </body>
 
