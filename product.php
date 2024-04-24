@@ -4,6 +4,7 @@ require_once "connection.php";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id=$_POST["id"];
     $quantity=$_POST['quantity'];
+    $userId=$_GET['user_id'];
     $sql="SELECT * FROM product WHERE id = $id";
     $result= mysqli_query($conn,$sql);
     while($row=mysqli_fetch_assoc($result)){
@@ -12,13 +13,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $price= $row['price'];
       $totalprice=$quantity*$price;
       
-      $sqlinsert="INSERT INTO cart(productId, image, name, quantity, price) VALUES('$id', '$image', '$name', '$quantity', '$totalprice')";
+      $sqlinsert="INSERT INTO cart(userId, productId, image, name, quantity, price) VALUES('$userId', '$id', '$image', '$name', '$quantity', '$totalprice')";
       mysqli_query($conn, $sqlinsert);
 
     }
     header("Location: {$_SERVER['REQUEST_URI']}");
 }
 ?>
+
+
+
 
 
 <!DOCTYPE html>

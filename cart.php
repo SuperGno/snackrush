@@ -74,13 +74,15 @@
               <th scope="col">Product</th>
               <th scope="col">Quantity</th>
               <th scope="col">Price</th>
+              <th scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
           <?php
-            require_once "connection.php";
-            $sql = "SELECT * FROM cart";
-            $result = mysqli_query($conn, $sql);
+          require_once "connection.php";
+            $userId = $_GET["user_id"];
+            $sqla = "SELECT * FROM cart WHERE userId=$userId";
+            $result = mysqli_query($conn, $sqla);
             while ($row = mysqli_fetch_assoc($result)) {
                 echo '<tr>';
                 echo '<th scope="row">' . $row['id'] . '</th>';
@@ -88,6 +90,7 @@
                 echo '<td>' . $row['name'] . '</td>';
                 echo '<td>' . $row['quantity'] . '</td>';
                 echo '<td> ₱ ' . $row['price'] . '</td>';
+                echo '<td><a href="deletefunction.php?product_id='. $row['id'] .'&& user_id= ' .$userId .' " type="button" class="btn btn-danger">Delete</button></td>';
                 echo '</tr>';
             }
             
@@ -96,7 +99,7 @@
           </tbody>
         </table>
       </section>
-        <button type="sumbit" class="btn btn-primary" id="checkoutBtn">Checkout</button>
+        <button type="sumbit" name="reciept" class="btn btn-primary" id="reciept">Checkout</button>
     <div class="modal" id="receiptModal">
       <div class="modal-dialog">
           <div class="modal-content">
@@ -104,6 +107,10 @@
                   <h5 class="modal-title">Receipt</h5>
               </div>
               <div class="modal-body">
+              </div>
+              <div class="modal-footer">
+                <button type="sumbit" name="checkout" class="btn btn-primary" id="checkoutBtn">Checkout</button>
+
               </div>
           </div>
       </div>
@@ -127,8 +134,25 @@
 
   <script>
         $(document).ready(function() {
-          var urlParams = new URLSearchParams(window.location.search);
-          var userId = urlParams.get('user_id'); // Extracting user_id from URL
+            var urlParams = new URLSearchParams(window.location.search);
+            var userId = urlParams.get('user_id'); // Extracting user_id from URL
+            $("#checkoutBtn").click(function(){
+                $.ajax({
+                  url: 'checkout.php',
+                  type: 'POST', // Change to POST method since you're modifying data
+                  data: { user_id: userId }, // Include the userId in the data sent to the server
+                  success: function(response) {
+                      // Handle success
+                      console.log(response); // Log the response for debugging
+                      window.location.href = "cart.php?user_id=" + userId;
+                  },
+                  error: function(xhr, status, error) {
+                      // Handle error
+                      console.error(xhr.responseText); // Log the error response for debugging
+                  }
+              });
+          });
+          
 
           $("#product").click(function() {
               window.location.href = "product.php?user_id=" + userId;
@@ -144,7 +168,7 @@
           });
 });
 $(document).ready(function(){
-    $("#checkoutBtn").click(function(){
+    $("#reciept").click(function(){
         $.ajax({
             url: 'getcartdata.php',
             type: 'GET',
